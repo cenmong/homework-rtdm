@@ -6,11 +6,9 @@ from env import *
 ####################################IPv6#####################################
 # Download files
 ym = yearmonth[0]
-'''
 os.system('wget -e robots=off --connect-timeout=3000 -np -P ' + hdname + ' -c -m -r -A.bz2\
         http://archive.routeviews.org/route-views6/bgpdata/' + ym +\
         '/UPDATES/')
-'''
 # Get file list
 os.system('lynx -dump http://archive.routeviews.org/route-views6/bgpdata/' + ym +\
         '/UPDATES/ > filehtml6')
@@ -47,13 +45,11 @@ f.close()
 flist.close()
 os.system('rm filehtml6')
 ####################################IPv4#####################################
-'''
 # Download files
 ym = yearmonth[0]
 os.system('wget -e robots=off --connect-timeout=3000 -np -P ' + hdname + ' -c -m -r -A.bz2\
         http://archive.routeviews.org/bgpdata/' + ym +\
         '/UPDATES/')
-'''
 # Get file list
 os.system('lynx -dump http://archive.routeviews.org/bgpdata/' + ym +\
         '/UPDATES/ > filehtml4')
