@@ -27,6 +27,10 @@ ud4c15 = []
 ud6c15 = []
 dtlist = []# Date time list
 
+as4_15 = {} # Have to, if i want asbothc15[]
+as6_15 = {}
+asbothc15 = []
+
 # TODO: If output files exist, use them instead of read all files again
 
 #IPv6
@@ -38,6 +42,8 @@ for line in flist.readlines():
     ymd = line.split('.')[-3]
     datetime = line.split('.')[-3] + line.split('.')[-2]
     dtlist.append(datetime)
+    as4_15[datetime] = []
+    as6_15[datetime] = []
     if ymd not in ymdlist:
         ymdlist.append(ymd)
         as6[ymd] = []# Initialize a list corresponding to a date
@@ -47,8 +53,6 @@ for line in flist.readlines():
         asboth[ymd] = []
 
     udcount = 0
-    ascount = 0
-    aslist = []
     f = open(hdname + line.replace('\n', ''), 'r')
     for line in f.readlines():
         if line == '' or line == '\n':
@@ -64,14 +68,13 @@ for line in flist.readlines():
             asn = content.split()[-1]
             if asn not in as6[ymd]:
                 as6[ymd].append(asn)
-            if asn not in aslist:
-                aslist.append(asn)
-                ascount += 1
+            if asn not in as6_15[datetime]:
+                as6_15[datetime].append(asn)
             if asn not in as6all:
                 as6all.append(asn)
 
     ud6c15.append(udcount)
-    as6c15.append(ascount)
+    as6c15.append(len(as6_15[datetime]))
     f.close()
 #IPv4
 #filelist = 'metadata/4files' + ym 
@@ -80,10 +83,9 @@ flist = open(filelist, 'r')
 for line in flist.readlines():
     print line
     ymd = line.split('.')[-3]
+    datetime = line.split('.')[-3] + line.split('.')[-2]
 
     udcount = 0
-    ascount = 0
-    aslist = []
     f = open(hdname + line.replace('\n', ''), 'r')
     for line in f.readlines():
         if line == '' or line == '\n':
@@ -99,14 +101,20 @@ for line in flist.readlines():
             asn = content.split()[-1]
             if asn not in as4[ymd]:
                 as4[ymd].append(asn)
-            if asn not in aslist:
-                aslist.append(asn)
-                ascount += 1
+            if asn not in as4_15[datetime]:
+                as4_15[datetime].append(asn)
             if asn not in as4all:
                 as4all.append(asn)
 
     ud4c15.append(udcount)
-    as4c15.append(ascount)
+    as4c15.append(len(as4_15[datetime]))
+    n = 0
+    for a in as6_15[datetime]:# The four lines for saving memory
+        if a in as4_15[datetime]:
+            n += 1
+    as6_15[datetime] = []
+    as4_15[datetime] = []
+    asbothc15.append(n)
     f.close()
 
 for ymd in ymdlist:
@@ -266,10 +274,11 @@ plt.figure(3, figsize=(16, 12))
 axScatter = plt.axes(rect_scatter)
 axScatter.plot(xaxis2, as4c15, 'r-')
 axScatter.plot(xaxis2, as6c15, 'b-')
-# TODO: asbothc15
+axScatter.plot(xaxis2, asbothc15, 'g-')
 
 axScatter.set_xlabel('Datetime')
 axScatter.set_ylabel('Number of origin ASes')
+axScatter.set_yscale('log')
 
 ylim = np.max(as4c15) + 100
 axScatter.set_ylim( (0, ylim) )
@@ -286,6 +295,7 @@ axScatter.plot(xaxis2, ud6c15, 'b-')
 
 axScatter.set_xlabel('Datetime')
 axScatter.set_ylabel('Number of updates')
+axScatter.set_yscale('log')
 
 ylim = np.max(ud4c15) + 100
 axScatter.set_ylim( (0, ylim) )
