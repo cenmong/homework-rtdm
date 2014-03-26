@@ -56,6 +56,7 @@ for line in flist.readlines():
     f = open(hdname + line.replace('\n', ''), 'r')
     for line in f.readlines():
         if line == '' or line == '\n':
+            # This is a potential bug. Modify it.
             udn6[ymd] += 1
             udcount += 1
             continue
