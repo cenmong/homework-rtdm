@@ -1,14 +1,16 @@
 import os
 from env import hdname
 
-ym = ['2003.08', '2005.09', '2005.08', '2006.12', '2008.01', '2008.12']
+ym = ['2003.08', '2005.09', '2005.08', '2006.12', '2008.01', '2008.12', '2011.03']
 
-ymd1 = ['20030814', '20050911', '20050829', '20061226', '20080130', '20081219']
+ymd1 = ['20030814', '20050911', '20050829', '20061226', '20080130', '20081219',
+     '20110310']
 
-ymd2 = ['20030815', '20050912', '20050830', '20061227', '20080131', '20081220']
+ymd2 = ['20030815', '20050912', '20050830', '20061227', '20080131', '20081220',
+     '20110311']
 
 # IPv6
-for i in range(0, len(ym)):
+for i in range(6, len(ym)):
     os.system('lynx -dump http://archive.routeviews.org/route-views6/bgpdata/' + ym[i] +\
             '/UPDATES/ > filehtml6')
     f = open('filehtml6', 'r')
@@ -47,7 +49,6 @@ for i in range(0, len(ym)):
                 os.system('rm ' + hdname + topofile)# Remove unparsed files
             except:# File has already been removed
                 pass
-
     f.close()
     flist.close()
     os.system('rm filehtml6')
@@ -92,7 +93,6 @@ for i in range(0, len(ym)):
                 os.system('rm ' + hdname + topofile)# Remove unparsed files
             except:# File has already been removed
                 pass
-
     f.close()
     flist.close()
     os.system('rm filehtml4')
