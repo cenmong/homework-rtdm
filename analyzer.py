@@ -3,33 +3,33 @@ from env import *
 import os
 from datetime import datetime
 import time 
-from update import *
+from update_class import *
+from window_class import *
 
 class Analyzer():
-    def __init__(self, filelist, target, granu, winsize):
+    def __init__(self, filelist, target, granu, win_maxsize):
         self.filelist = filelist# filelist file name 
-        # Change addresses into bits
         self.target = target# Tuple of tuples: ((AS, addr4, addr6), (...)) 
         self.granu = granu # Granularity
-        self.as_list = []
-        self.addr4_list = []
-        self.addr6_list = []
-        # Modify target BGP peer address format
+        self.as_list = []# Interesting BGP peer AS
+        self.addr4_list = []# IP4 addresses of interesting peer
+        self.addr6_list = []# IP6 addresses of interesting peer
+        self.update_count = {}# {datetime: (4 update count, 6 update count)}
+        self.win_maxsize = win_maxsize# Maximum window size (in seconds) in dynamic analysis
+        # Modify target BGP peer address format into 0s and 1s
         for t in target:
             self.as_list.append(t[0])
             addr4 = IPAddress(t[1]).bits().replace('.', '')
             self.addr4_list.append(addr4)
             addr6 = IPAddress(t[2]).bits().replace(':', '')
             self.addr6_list.append(addr6)
-        # Store update count in dict 
-        self.update_count = {}# {datetime: (4 update count, 6 update count)}
-        self.winsize = winsize# Window size (in seconds) in dynamic analysis
 
     def parse_update(self):
+        win = Window(self.win_maxsize)# Initialize a window object
         filelist = open(self.filelist, 'r')
         for f in filelist.readlines():
             f = f.replace('\n', '')
-            print f
+            print f# Print currently parsing file name
             f = open(hdname + f, 'r')
             update_chunk = ''
             for line in f.readlines():
@@ -38,11 +38,18 @@ class Analyzer():
                         continue
                     else:
                         updt = Update(update_chunk)# Create Update object
+                        from_ip = updt.get_from_ip
+                        if from_ip in self.addr4_list:
+                            win.move_forward(updt, 4)
+                        elif from_ip in self.addr6_list:
+                            win.move_forward(updt, 6)
+                        update_chunk = ''
                         
                 update_chunk += line + '\n'
+                '''
                 # Get attribute name and value
                 header = line.split(': ')[0]
-                try:
+                try
                     content = line.split(': ')[1].replace('\n', '')
                 except:
                     continue
@@ -77,8 +84,8 @@ class Analyzer():
                             self.update_count[dt_gra][0] += 1
                         elif addr in self.addr6_list:# if it is our interesting
                             # BGP peer v6 address 
-                            self.update_count[dt_gra][1] += 1
-
+                            self.update_count[dt_gra][1] += 1'''
+            
         filelist.close()
         f.close()
         return 0

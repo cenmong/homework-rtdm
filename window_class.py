@@ -1,11 +1,14 @@
+from update_class import *
+
 class Window():
-    def __init__(self, maxsize, time_start):
+    def __init__(self, maxsize):
         self.size = 0
         self.maxsize = maxsize
         self.update_dict4 = {} # time in seconds: list of update obj
         self.update_dict6 = {} 
-        self.start = time_start# Window start
-        self.end = time_start# Window end
+        self.start = 0# Window start
+        self.end = 0# Window end
+        self.ctime = 0# current time. Decide whether move forward window
         # BGP dynamics count from beginning to end
         # IPv4 variables
         self.wadi4 = 0
@@ -24,7 +27,16 @@ class Window():
         self.wadu6 = 0
         self.aw6 = 0
 
-    def move_forward(self, ):# TODO: add file name which has correct pointer
+    def move_forward(self, update, protocol):# TODO: add file name which has correct pointer
+        if self.start = 0:# first run
+            self.start = update.get_time()
+            self.end = update.get_time()
+            self.ctime = update.get_time()
+        elif self.size < self.maxsize:
+        elif self.size == self.maxsize:
+            time = update.get_time()
+            if time > ctime:
+                # move forward
         if self.size < self.maxsize:
             self.end += 1
         if self.size == self.maxsize:
