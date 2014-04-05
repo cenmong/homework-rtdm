@@ -3,8 +3,8 @@ from netaddr import *
 from env import *
 import os
 
-ym = yearmonth[0]
-dn = yearmonth[1]#number of days
+ym = yearmonth[1]# Change when necessary
+monitor = rv_monitor[2]
 
 ######variables with daily granularity#####
 as4all = []# Statistics of the whole month
@@ -35,9 +35,9 @@ asbothc15 = []
 
 #IPv6
 #filelist = 'metadata/6files' + ym 
-filelist = 'metadata/test6files' + ym 
+filelist = 'metadata/' + monitor + ym 
 flist = open(filelist, 'r')
-for line in flist.readlines():
+for line in flist.readlines():# Read each file's name
     print line
     ymd = line.split('.')[-3]
     datetime = line.split('.')[-3] + line.split('.')[-2]
