@@ -9,4 +9,4 @@ target = ((5580, '198.32.176.206', '2001:504:D::5580:1'),
 
 ana = Analyzer(filelist, target, '10 minute')
 ana.parse_update()
-ana.plot()
+ana.plot_update_count()

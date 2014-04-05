@@ -2,9 +2,11 @@ from netaddr import *
 from env import *
 import os
 from datetime import datetime
+import time 
+from update import *
 
 class Analyzer():
-    def __init__(self, filelist, target, granu):
+    def __init__(self, filelist, target, granu, winsize):
         self.filelist = filelist# filelist file name 
         # Change addresses into bits
         self.target = target# Tuple of tuples: ((AS, addr4, addr6), (...)) 
@@ -12,13 +14,16 @@ class Analyzer():
         self.as_list = []
         self.addr4_list = []
         self.addr6_list = []
+        # Modify target BGP peer address format
         for t in target:
             self.as_list.append(t[0])
             addr4 = IPAddress(t[1]).bits().replace('.', '')
             self.addr4_list.append(addr4)
             addr6 = IPAddress(t[2]).bits().replace(':', '')
             self.addr6_list.append(addr6)
-        self.update_count = {}# 1 minute, datetime: (4 update count, 6 update count)
+        # Store update count in dict 
+        self.update_count = {}# {datetime: (4 update count, 6 update count)}
+        self.winsize = winsize# Window size (in seconds) in dynamic analysis
 
     def parse_update(self):
         filelist = open(self.filelist, 'r')
@@ -26,9 +31,15 @@ class Analyzer():
             f = f.replace('\n', '')
             print f
             f = open(hdname + f, 'r')
+            update_chunk = ''
             for line in f.readlines():
                 if line == '' or line == '\n':
-                    continue
+                    if update_chunk == '':# Game start
+                        continue
+                    else:
+                        updt = Update(update_chunk)# Create Update object
+                        
+                update_chunk += line + '\n'
                 # Get attribute name and value
                 header = line.split(': ')[0]
                 try:
@@ -38,35 +49,41 @@ class Analyzer():
 
                 if header == 'TIME':
                     dt = datetime.strptime(content, '%Y-%m-%d %H:%M:%S')
+                    dt_s = time.mktime(dt.timetuple())# Datetime in seconds
+                    # Get datetime object of a specific granularity
                     if self.granu == '1 minute':
-                        dt = dt.replace(second = 0, microsecond = 0)
+                        dt_gra = dt.replace(second = 0, microsecond = 0)
                     elif self.granu == '10 minute': 
-                        dt = dt.replace(second = 0, microsecond = 0)
-                        mi = (dt.minute / 10) * 10
-                        dt = dt.replace(minute = mi)
+                        dt_gra = dt.replace(second = 0, microsecond = 0)
+                        mi = (dt_gra.minute / 10) * 10
+                        dt_gra = dt_gra.replace(minute = mi)
                     else:
                         pass
 
                 if header == 'FROM':
                     addr = IPAddress(content).bits()
+                    # Address format modification
                     if len(addr) > 100:# IPv6 addr
                         addr = addr.replace(':', '')
                     else:# IPv4 addr
                         addr = addr.replace('.', '')
-                        
+
+                    # If this is from our interested BGP peer IP
                     if addr in self.addr4_list or addr in self.addr6_list:
-                        if dt not in self.update_count.keys():
-                            self.update_count[dt] = [0, 0]
-                        if addr in self.addr4_list:# if it is interesting DS AS
-                            self.update_count[dt][0] += 1
-                        elif addr in self.addr6_list:
-                            self.update_count[dt][1] += 1
+                        if dt_gra not in self.update_count.keys():
+                            self.update_count[dt_gra] = [0, 0]
+                        if addr in self.addr4_list:# if it is our interesting
+                            # BGP peer v4 address 
+                            self.update_count[dt_gra][0] += 1
+                        elif addr in self.addr6_list:# if it is our interesting
+                            # BGP peer v6 address 
+                            self.update_count[dt_gra][1] += 1
 
         filelist.close()
         f.close()
         return 0
 
-    def plot(self):
+    def plot_update_count(self):
         import matplotlib.pyplot as plt 
         import matplotlib.dates as mpldates
         from matplotlib.dates import HourLocator
