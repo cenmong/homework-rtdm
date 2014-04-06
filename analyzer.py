@@ -25,7 +25,8 @@ class Analyzer():
             self.addr6_list.append(addr6)
 
     def parse_update(self):
-        win = Window(self.win_maxsize)# Initialize a window object
+        win4 = Window(self.win_maxsize, 4)# Initialize a window object
+        win6 = Window(self.win_maxsize, 6)# Initialize a window object
         filelist = open(self.filelist, 'r')
         for f in filelist.readlines():
             f = f.replace('\n', '')
@@ -38,11 +39,11 @@ class Analyzer():
                         continue
                     else:
                         updt = Update(update_chunk)# Create Update object
-                        from_ip = updt.get_from_ip
+                        from_ip = updt.get_from_ip()
                         if from_ip in self.addr4_list:
-                            win.move_forward(updt, 4)
+                            win4.add(updt)
                         elif from_ip in self.addr6_list:
-                            win.move_forward(updt, 6)
+                            win6.add(updt)
                         update_chunk = ''
                         
                 update_chunk += line + '\n'

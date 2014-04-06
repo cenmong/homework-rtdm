@@ -5,7 +5,8 @@ class Update():
     def __init__(self, string):
         # initialize self values
         self.next_hop = None
-        self.announce = None
+        self.announce = []
+        self.withdrawn = []
         self.as_path = None 
         self.communities = None
         self.origin = None
@@ -47,7 +48,9 @@ class Update():
             elif header == 'NEXT_HOP':
                 self.next_hop =
             elif header == 'ANNOUNCE':
-                self.announce = 
+                self.announce.append(self.pfx_to_binary())
+            elif header == 'WITHDRAWN':
+                self.withdrawn.append(self.pfx_to_binary())
             elif header == 'AS_PATH':
                 self.as_path = # a list
             elif header == 'COMMUNITIES':
@@ -58,8 +61,13 @@ class Update():
                 print header
                 pass
 
+    def pfx_to_binary(self, content):
+        
+
     def equal_to(self, Update u):
-        if self.next_hop == u.next_hop and self.announce == u.announce and ...:
+        # May be incomplete.
+        if self.next_hop == u.next_hop and self.as_path == u.as_path and
+        self.communities ==u.communities and self.origin = u.origin:
             return True
         else:
             return False
@@ -69,4 +77,17 @@ class Update():
 
     def get_from_ip(self):
         return self.from_ip
-        
+
+    def get_announce(self):# 0 1 string
+        return self.announce
+
+    def get_withdrawn(self):# 0 1 string
+        return self.withdrawn
+
+    def get_dynamic_type(self):# Withdraw & Announce & Other
+        if self.announce != [] and self.withdrawn == []:
+            return 'A'
+        elif self.announce == [] and self.withdrawn != []:
+            return 'W'
+        else:
+            return 'O'
