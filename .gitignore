@@ -6,3 +6,4 @@ wget-log*
 trpath/
 output/
 metadata/
+*.swp

@@ -5,13 +5,13 @@ import patricia
 class Window():
     def __init__(self, maxsize, protocol_type):
         self.ptype = protocol_type
+        # Window parameters
         self.maxsize = maxsize
-        # IPv4 window parameters
         self.size = 0
         self.start = 0# Window start
         self.end = 0# Window end
         self.trie = patricia.trie(None)# Store still active updates by prefix.
-        # BGP dynamics count from beginning to end. IPv4 variables
+        # BGP dynamics count variables
         self.wadi = 0
         self.aadi = 0
         self.wwdu = 0
@@ -32,47 +32,90 @@ class Window():
                 upfx_list = update.get_withdrawn()
             else:# We currently do not deal with other types
                 return 0
-            if self.end == utime:# No need to move window forward
-                for upfx in upfx_list:
-                    find_pfx = self.trie4.key(upfx, start = 0, end = None, default = None)
-                    if find_pfx == None or len(find_pfx) != len(upfx):# No corresponding prefix stored
-                        self.trie4[upfx] = []# Add new node value: a list of updates
-                        self.trie4[upfx].append(update)# Add this update as first one
-                    else:# Prefix has been stored before
-                        update_list = self.trie4[upfx]
-                        for ud in reversed(update_list):
-                            if ud.
-                    #If not: add this node
-                    #If yes: variable + 1
+                   
+            if self.end == utime:# No need to tackle window size
+                self.analyze_updates(upfx_list)
             elif self.end < utime:
                 if self.size < self.maxsize:# Just increase window end
                     self.size += utime - self.end
                     self.end = utime
                     if self.size > self.maxsize: # When utime - end > 1
-                        # TODO:delete outside updates
-                else:
+                        self.start += self.size - self.maxsize
+                        self.size = self.maxsize
+                        self.cut_trie()# Delete outside updates
+                else:# size alraedy maximum
                     self.start += utime - self.end
                     self.end = utime
-                    # TODO:delete outside updates
-
-            else:
+                    self.cut_trie()
+            else:# end > utime
                 print 'Wrong!'
-        elif self.size < self.maxsize:
-        elif self.size == self.maxsize:
-            time = update.get_time()
-            if time > ctime:
-                # move forward
-        if self.size < self.maxsize:
-            self.end += 1
-        if self.size == self.maxsize:
-            self.start += 1
-            self.end += 1
-            # TODO: delete the smallest key and value
 
-        self.update_dict[self.end] = []
-        for line in ...# TODO: fulfil the new list by updates
-            #Create update objects and store them in dict
-            # check time and ip, if not interested, do not create obj
+    def analyze_updates(self, update_list)
+        for upfx in update_list:
+            find_pfx = self.trie4.key(upfx, start = 0, end = None, default = None)
+            if find_pfx == None or len(find_pfx) != len(upfx):# No corresponding prefix stored
+                self.trie4[upfx] = []# Add new node value: a list of updates
+                self.trie4[upfx].append(update)# Add this update as first one
+            else:# Prefix has been stored before
+                update_list = self.trie4[upfx]
+                for ud in reversed(update_list):
+                    if ud.get_dynamic_type() == 'A' and\
+                    update.get_dynamic_type() == 'A' and\
+                    ud.equal_to(update):
+                        self.aadut1 += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'A' and\
+                    update.get_dynamic_type() == 'A' and not\
+                    ud.equal_to(update) and ...:
+                        self.aadut2 += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'W' and\
+                    update.get_dynamic_type() == 'A' and not\
+                    ud.equal_to(update):
+                        self.wadi += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'A' and\
+                    update.get_dynamic_type() == 'A' and not\
+                    ud.equal_to(update):
+                        self.aadi += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'W' and\
+                    update.get_dynamic_type() == 'W' and\
+                    ud.equal_to(update):
+                        self.wwdu += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'W' and\
+                    update.get_dynamic_type() == 'A' and not\
+                    ud.equal_to(update) and ud.has_same_path(update):
+                        self.wadu += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
+                    if ud.get_dynamic_type() == 'A' and\
+                    update.get_dynamic_type() == 'W' and not\
+                    ud.equal_to(update) and ud.has_same_path(update):
+                        self.aw += 1
+                        update_list.remove(ud)
+                        update_list.append(update)
+                        continue
 
-    def analyze():
-        # anylize new updates and add variables
+    def cut_trie(self):
+        for ulist in sorted(self.trie):
+            try:
+                for update in ulist:
+                    if update.get_time() < self.start:
+                        ulist.remove(update)
+                if ulist == []:
+                    del ulist
+            except:
+                pass

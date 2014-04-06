@@ -1,5 +1,6 @@
 from datetime import datetime
 from netaddr import *
+import time
 
 class Update():
     def __init__(self, string):
@@ -7,15 +8,17 @@ class Update():
         self.next_hop = None
         self.announce = []
         self.withdrawn = []
-        self.as_path = None 
+        self.as_path = []
         self.communities = None
         self.origin = None
+        self.protocol = None# For modify prefix format
 
-        string = string.split('\n')
+        string = string.split('@@@')
         for line in string:
-            if line == '' or line == '\n':# may occur at beginning or end
+            if string == '':# May exist at beginning or end
                 continue
-            line.replace('|', '') # IPv6 updates has '|' in them
+            line.replace('|', '') # IPv6 updates has '|'
+
             header = line.split(': ')[0]
             try:
                 content = line.split(': ')[1]
@@ -33,41 +36,47 @@ class Update():
                     self.protocol = 6
                 else:# IPv4 addr
                     self.from_ip = addr.replace('.', '')
-                    self.protocol = 4
+                    self.protocol = 4 
 
-                # If this is from our interested BGP peer IP
-                if addr in self.addr4_list or addr in self.addr6_list:
-                    if dt_gra not in self.update_count.keys():
-                        self.update_count[dt_gra] = [0, 0]
-                    if addr in self.addr4_list:# if it is our interesting
-                        # BGP peer v4 address 
-                        self.update_count[dt_gra][0] += 1
-                    elif addr in self.addr6_list:# if it is our interesting
-                        # BGP peer v6 address 
-                        self.update_count[dt_gra][1] += 1
             elif header == 'NEXT_HOP':
-                self.next_hop =
+                self.next_hop = self.pfx_to_binary(content)
             elif header == 'ANNOUNCE':
-                self.announce.append(self.pfx_to_binary())
+                self.announce.append(self.pfx_to_binary(content))
             elif header == 'WITHDRAWN':
-                self.withdrawn.append(self.pfx_to_binary())
+                self.withdrawn.append(self.pfx_to_binary(content))
             elif header == 'AS_PATH':
-                self.as_path = # a list
+                self.as_path = content.split()
             elif header == 'COMMUNITIES':
-                self.communities =
+                self.communities = content# Store string really OK?
             elif header == 'ORIGIN':
-                self.origin =
+                self.origin = content
             else:
-                print header
+                print 'unrecognized header: ', header
                 pass
 
     def pfx_to_binary(self, content):
-        
+        if self.protocol == 4:
+            addr = IPAddress(content).bits()
+            addr = addr.replace('.', '')
+            return addr
+        elif self.protocol == 6:
+            addr = IPAddress(content).bits()
+            addr = addr.replace(':', '')
+            return addr
+        else:
+            print 'protocol false!'
+            return 0
 
-    def equal_to(self, Update u):
+    def equal_to(self, Update u):# According to Jun Li, do not consider prefix
         # May be incomplete.
         if self.next_hop == u.next_hop and self.as_path == u.as_path and
         self.communities ==u.communities and self.origin = u.origin:
+            return True
+        else:
+            return False
+
+    def has_same_path(self, Update u):
+        if self.as_path == u.as_path:
             return True
         else:
             return False
@@ -78,10 +87,10 @@ class Update():
     def get_from_ip(self):
         return self.from_ip
 
-    def get_announce(self):# 0 1 string
+    def get_announce(self):
         return self.announce
 
-    def get_withdrawn(self):# 0 1 string
+    def get_withdrawn(self):
         return self.withdrawn
 
     def get_dynamic_type(self):# Withdraw & Announce & Other

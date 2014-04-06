@@ -46,7 +46,7 @@ class Analyzer():
                             win6.add(updt)
                         update_chunk = ''
                         
-                update_chunk += line + '\n'
+                update_chunk += line + '@@@'
                 '''
                 # Get attribute name and value
                 header = line.split(': ')[0]
