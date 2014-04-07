@@ -7,15 +7,16 @@ from update_class import *
 from window_class import *
 
 class Analyzer():
+
     def __init__(self, filelist, target, granu, win_maxsize):
         self.filelist = filelist# filelist file name 
-        self.target = target# Tuple of tuples: ((AS, addr4, addr6), (...)) 
         self.granu = granu # Granularity
         self.as_list = []# Interesting BGP peer AS
         self.addr4_list = []# IP4 addresses of interesting peer
         self.addr6_list = []# IP6 addresses of interesting peer
         self.update_count = {}# {datetime: (4 update count, 6 update count)}
-        self.win_maxsize = win_maxsize# Maximum window size (in seconds) in dynamic analysis
+        self.win4 = Window(win_maxsize, 4)# Initialize a window object
+        self.win6 = Window(win_maxsize, 6)# Initialize a window object
         # Modify target BGP peer address format into 0s and 1s
         for t in target:
             self.as_list.append(t[0])
@@ -25,28 +26,28 @@ class Analyzer():
             self.addr6_list.append(addr6)
 
     def parse_update(self):
-        win4 = Window(self.win_maxsize, 4)# Initialize a window object
-        win6 = Window(self.win_maxsize, 6)# Initialize a window object
         filelist = open(self.filelist, 'r')
         for f in filelist.readlines():
             f = f.replace('\n', '')
-            print f# Print currently parsing file name
+            print f
             f = open(hdname + f, 'r')
             update_chunk = ''
             for line in f.readlines():
-                if line == '' or line == '\n':
+                if line == '':
+                    continue
+                if line == '\n':
                     if update_chunk == '':# Game start
                         continue
                     else:
-                        updt = Update(update_chunk)# Create Update object
+                        updt = Update(update_chunk)
                         from_ip = updt.get_from_ip()
                         if from_ip in self.addr4_list:
-                            win4.add(updt)
+                            self.win4.add(updt)
                         elif from_ip in self.addr6_list:
-                            win6.add(updt)
+                            self.win6.add(updt)
                         update_chunk = ''
                         
-                update_chunk += line + '@@@'
+                update_chunk += line.replace('\n', '') + '@@@'
                 '''
                 # Get attribute name and value
                 header = line.split(': ')[0]
@@ -128,3 +129,7 @@ class Analyzer():
 
         plt.show()
         return 0
+
+    def plot_bgp_dynamic(self):
+        print self.win4.wwdu
+        print self.win6.wwdu

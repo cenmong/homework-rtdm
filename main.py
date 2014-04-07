@@ -7,6 +7,7 @@ target = ((5580, '198.32.176.206', '2001:504:D::5580:1'),
         (8218, '198.32.176.95', '2001:504:D::5f'),
         (36351, '198.32.176.207', '2001:504:D::3:6351:1'),)
 
-ana = Analyzer(filelist, target, '10 minute')
+ana = Analyzer(filelist, target, '10 minute', 45)
 ana.parse_update()
-ana.plot_update_count()
+#ana.plot_update_count()
+ana.plot_bgp_dynamic()

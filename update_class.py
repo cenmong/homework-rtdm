@@ -3,19 +3,19 @@ from netaddr import *
 import time
 
 class Update():
+
     def __init__(self, string):
-        # initialize self values
         self.next_hop = None
         self.announce = []
         self.withdrawn = []
         self.as_path = []
         self.communities = None
         self.origin = None
-        self.protocol = None# For modify prefix format
+        self.protocol = None# For modifing prefix format
 
         string = string.split('@@@')
         for line in string:
-            if string == '':# May exist at beginning or end
+            if string == '':# May exist at the end
                 continue
             line.replace('|', '') # IPv6 updates has '|'
 
@@ -28,13 +28,13 @@ class Update():
             if header == 'TIME':
                 dt = datetime.strptime(content, '%Y-%m-%d %H:%M:%S') 
                 self.time = time.mktime(dt.timetuple())# Datetime in seconds
+                print self.time # For debug
             elif header == 'FROM':
                 addr = IPAddress(content).bits()
-                # Address format modification
                 if len(addr) > 100:# IPv6 addr
                     self.from_ip = addr.replace(':', '')
                     self.protocol = 6
-                else:# IPv4 addr
+                else:
                     self.from_ip = addr.replace('.', '')
                     self.protocol = 4 
 
@@ -98,5 +98,7 @@ class Update():
             return 'A'
         elif self.announce == [] and self.withdrawn != []:
             return 'W'
+        elif self.announce != [] and self.withdrawn != []:
+            print 'type error!'
         else:
             return 'O'
