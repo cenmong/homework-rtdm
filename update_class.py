@@ -2,6 +2,8 @@ from datetime import datetime
 from netaddr import *
 import time
 
+# When announcements and withdrawls both exist, I always consider former first
+
 class Update():
 
     def __init__(self, string):
@@ -28,7 +30,7 @@ class Update():
             if header == 'TIME':
                 dt = datetime.strptime(content, '%Y-%m-%d %H:%M:%S') 
                 self.time = time.mktime(dt.timetuple())# Datetime in seconds
-                print self.time # For debug
+                #print self.time # For debug
             elif header == 'FROM':
                 addr = IPAddress(content).bits()
                 if len(addr) > 100:# IPv6 addr
@@ -40,7 +42,7 @@ class Update():
 
             elif header == 'NEXT_HOP':
                 self.next_hop = self.pfx_to_binary(content)
-            elif header == 'ANNOUNCE':
+            elif header == 'ANNOUNCED':
                 self.announce.append(self.pfx_to_binary(content))
             elif header == 'WITHDRAWN':
                 self.withdrawn.append(self.pfx_to_binary(content))
@@ -51,31 +53,41 @@ class Update():
             elif header == 'ORIGIN':
                 self.origin = content
             else:
-                print 'unrecognized header: ', header
+                #print 'unrecognized header: ', header
                 pass
 
     def pfx_to_binary(self, content):
+        length = None
+        pfx = content.split('/')[0]
+        try:
+            length = int(content.split('/')[1])
+        except:
+            pass
         if self.protocol == 4:
-            addr = IPAddress(content).bits()
+            addr = IPAddress(pfx).bits()
             addr = addr.replace('.', '')
+            if length:
+                addr = addr[:length]
             return addr
         elif self.protocol == 6:
-            addr = IPAddress(content).bits()
+            addr = IPAddress(pfx).bits()
             addr = addr.replace(':', '')
+            if length:
+                addr = addr[:length]
             return addr
         else:
             print 'protocol false!'
             return 0
 
-    def equal_to(self, Update u):# According to Jun Li, do not consider prefix
+    def equal_to(self, u):# According to Jun Li, do not consider prefix
         # May be incomplete.
-        if self.next_hop == u.next_hop and self.as_path == u.as_path and
-        self.communities ==u.communities and self.origin = u.origin:
+        if self.next_hop == u.next_hop and self.as_path == u.as_path and\
+        self.communities ==u.communities and self.origin == u.origin:
             return True
         else:
             return False
 
-    def has_same_path(self, Update u):
+    def has_same_path(self, u):
         if self.as_path == u.as_path:
             return True
         else:
@@ -92,13 +104,3 @@ class Update():
 
     def get_withdrawn(self):
         return self.withdrawn
-
-    def get_dynamic_type(self):# Withdraw & Announce & Other
-        if self.announce != [] and self.withdrawn == []:
-            return 'A'
-        elif self.announce == [] and self.withdrawn != []:
-            return 'W'
-        elif self.announce != [] and self.withdrawn != []:
-            print 'type error!'
-        else:
-            return 'O'

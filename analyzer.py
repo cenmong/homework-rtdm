@@ -15,8 +15,8 @@ class Analyzer():
         self.addr4_list = []# IP4 addresses of interesting peer
         self.addr6_list = []# IP6 addresses of interesting peer
         self.update_count = {}# {datetime: (4 update count, 6 update count)}
-        self.win4 = Window(win_maxsize, 4)# Initialize a window object
-        self.win6 = Window(win_maxsize, 6)# Initialize a window object
+        self.win4 = Window(win_maxsize)# Initialize a window object
+        self.win6 = Window(win_maxsize)# Initialize a window object
         # Modify target BGP peer address format into 0s and 1s
         for t in target:
             self.as_list.append(t[0])
@@ -131,5 +131,17 @@ class Analyzer():
         return 0
 
     def plot_bgp_dynamic(self):
+        print self.win4.wadi
+        print self.win4.aadi
         print self.win4.wwdu
+        print self.win4.aadut1
+        print self.win4.aadut2
+        print self.win4.wadu
+        print self.win4.aw
+        print self.win6.wadi
+        print self.win6.aadi
         print self.win6.wwdu
+        print self.win6.aadut1
+        print self.win6.aadut2
+        print self.win6.wadu
+        print self.win6.aw
