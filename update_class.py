@@ -41,8 +41,9 @@ class Update():
                     self.protocol = 4 
 
             elif header == 'NEXT_HOP':
+                content = content.split('  (')[0]
                 self.next_hop = self.pfx_to_binary(content)
-            elif header == 'ANNOUNCED':
+            elif header.startswith('ANNOUNCE'):
                 self.announce.append(self.pfx_to_binary(content))
             elif header == 'WITHDRAWN':
                 self.withdrawn.append(self.pfx_to_binary(content))

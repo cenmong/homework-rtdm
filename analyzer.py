@@ -44,6 +44,7 @@ class Analyzer():
                         if from_ip in self.addr4_list:
                             self.win4.add(updt)
                         elif from_ip in self.addr6_list:
+                            print update_chunk
                             self.win6.add(updt)
                         update_chunk = ''
                         

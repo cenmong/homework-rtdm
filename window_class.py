@@ -20,6 +20,9 @@ class Window():
         self.aw = 0
 
     def add(self, update):
+        if len(update.get_from_ip()) > 32:
+            if update.get_announce() != []:
+                print update.get_announce()
         utime = update.get_time()
         if self.start == 0:# first run
             self.start = utime
