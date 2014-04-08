@@ -35,7 +35,7 @@ class Analyzer():
             for line in f.readlines():
                 if line == '':
                     continue
-                if line == '\n':
+                elif line == '\n':
                     if update_chunk == '':# Game start
                         continue
                     else:
@@ -49,8 +49,8 @@ class Analyzer():
                         elif from_ip in self.addr6_list:
                             self.win6.add(updt)
                         update_chunk = ''
-                        
-                update_chunk += line.replace('\n', '') + '@@@'
+                else:        
+                    update_chunk += line.replace('\n', '') + '@@@'
                 '''
                 # Get attribute name and value
                 header = line.split(': ')[0]
@@ -134,17 +134,21 @@ class Analyzer():
         return 0
 
     def plot_bgp_dynamic(self):
-        print self.win4.wadi
-        print self.win4.aadi
-        print self.win4.wwdu
-        print self.win4.aadut1
-        print self.win4.aadut2
-        print self.win4.wadu
-        print self.win4.aw
-        print self.win6.wadi
-        print self.win6.aadi
-        print self.win6.wwdu
-        print self.win6.aadut1
-        print self.win6.aadut2
-        print self.win6.wadu
-        print self.win6.aw
+        all4 = self.win4.wadi + self.win4.aadi + self.win4.wwdu +\
+        self.win4.aadut1 + self.win4.aadut2 + self.win4.wadu + self.win4.aw
+        print self.win4.wadi, ':', float(self.win4.wadi)/float(all4) * 100, '%'
+        print self.win4.aadi, ':', float(self.win4.aadi)/float(all4) * 100, '%'
+        print self.win4.wwdu, ':', float(self.win4.wwdu)/float(all4) * 100, '%'
+        print self.win4.aadut1, ':', float(self.win4.aadut1)/float(all4) * 100, '%'
+        print self.win4.aadut2, ':', float(self.win4.aadut2)/float(all4) * 100, '%'
+        print self.win4.wadu, ':', float(self.win4.wadu)/float(all4) * 100, '%'
+        print self.win4.aw, ':', float(self.win4.aw)/float(all4) * 100, '%'
+        all6 = self.win6.wadi + self.win6.aadi + self.win6.wwdu +\
+        self.win6.aadut1 + self.win6.aadut2 + self.win6.wadu + self.win6.aw
+        print self.win6.wadi, ':', float(self.win6.wadi)/float(all6) * 100, '%'
+        print self.win6.aadi, ':', float(self.win6.aadi)/float(all6) * 100, '%'
+        print self.win6.wwdu, ':', float(self.win6.wwdu)/float(all6) * 100, '%'
+        print self.win6.aadut1, ':', float(self.win6.aadut1)/float(all6) * 100, '%'
+        print self.win6.aadut2, ':', float(self.win6.aadut2)/float(all6) * 100, '%'
+        print self.win6.wadu, ':', float(self.win6.wadu)/float(all6) * 100, '%'
+        print self.win6.aw, ':', float(self.win6.aw)/float(all6) * 100, '%'

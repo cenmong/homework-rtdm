@@ -2,7 +2,8 @@ from datetime import datetime
 from netaddr import *
 import time
 
-# When announcements and withdrawls both exist, I always consider former first
+# We ignore: 1) an update announces and withdraws the same prefix
+# 2) an update announces the same prefix twice
 
 class Update():
 
@@ -111,6 +112,19 @@ class Update():
 
     def get_protocol(self):
         return self.protocol
+
+    def is_abnormal(self):
+        aset = set(self.announce)
+        if len(aset) < len(self.announce):
+            return True
+        wset = set(self.withdrawn)
+        if len(wset) < len(self.withdrawn):
+            return True
+        bset = aset.intersection(wset)
+        if bset:
+            return True
+
+        return False
 
     def print_attr(self):
         print self.time
