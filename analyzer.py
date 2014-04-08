@@ -40,11 +40,13 @@ class Analyzer():
                         continue
                     else:
                         updt = Update(update_chunk)
+                        #if updt.get_protocol() == 6:
+                            #print update_chunk
+                            #updt.print_attr()
                         from_ip = updt.get_from_ip()
                         if from_ip in self.addr4_list:
                             self.win4.add(updt)
                         elif from_ip in self.addr6_list:
-                            print update_chunk
                             self.win6.add(updt)
                         update_chunk = ''
                         

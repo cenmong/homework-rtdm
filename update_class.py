@@ -7,6 +7,7 @@ import time
 class Update():
 
     def __init__(self, string):
+        self.time = None
         self.next_hop = None
         self.announce = []
         self.withdrawn = []
@@ -19,7 +20,7 @@ class Update():
         for line in string:
             if string == '':# May exist at the end
                 continue
-            line.replace('|', '') # IPv6 updates has '|'
+            line = line.replace('|', '') # 6 and some 4 updates has '|'
 
             header = line.split(': ')[0]
             try:
@@ -30,10 +31,9 @@ class Update():
             if header == 'TIME':
                 dt = datetime.strptime(content, '%Y-%m-%d %H:%M:%S') 
                 self.time = time.mktime(dt.timetuple())# Datetime in seconds
-                #print self.time # For debug
             elif header == 'FROM':
                 addr = IPAddress(content).bits()
-                if len(addr) > 100:# IPv6 addr
+                if len(addr) > 40:# IPv6 addr
                     self.from_ip = addr.replace(':', '')
                     self.protocol = 6
                 else:
@@ -42,7 +42,10 @@ class Update():
 
             elif header == 'NEXT_HOP':
                 content = content.split('  (')[0]
-                self.next_hop = self.pfx_to_binary(content)
+                if content == '': # can happen
+                    self.next_hop = ''
+                else:
+                    self.next_hop = self.pfx_to_binary(content)
             elif header.startswith('ANNOUNCE'):
                 self.announce.append(self.pfx_to_binary(content))
             elif header == 'WITHDRAWN':
@@ -105,3 +108,16 @@ class Update():
 
     def get_withdrawn(self):
         return self.withdrawn
+
+    def get_protocol(self):
+        return self.protocol
+
+    def print_attr(self):
+        print self.time
+        print self.next_hop
+        print self.announce
+        print self.withdrawn
+        print self.as_path
+        print self.communities
+        print self.origin
+        print self.protocol
