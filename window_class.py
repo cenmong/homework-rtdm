@@ -19,6 +19,7 @@ class Window():
         self.aadut2 = 0
         self.wadu = 0
         self.aw = 0
+        self.time_update = {}
 
     def add(self, update):
         if update.is_abnormal():
@@ -46,6 +47,10 @@ class Window():
                 print 'Wrong update time!'
             else:
                 pass
+        try:
+            self.time_update[utime].append(update)
+        except:
+            self.time_update[utime] = []
         self.analyze_updates(update)
 
     def analyze_updates(self, update):
@@ -131,6 +136,12 @@ class Window():
         return 0
 
     def cut_trie(self):
+        for t in self.time_update.keys():
+            if t < self.start:
+                for u in self.time_update[t]:
+                    del u
+                del self.time_update[t]
+        '''
         for ulist in sorted(self.trie):
             try:
                 for update in ulist:
@@ -139,4 +150,4 @@ class Window():
                 if ulist == []:
                     del ulist
             except:
-                pass
+                pass'''
