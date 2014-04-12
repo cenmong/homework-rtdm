@@ -72,6 +72,7 @@ class Window():
                 if ud.get_time() < self.start:
                     update_list.remove(ud)
                     continue
+
                 if upfx in ud.get_announce():
                     if ud.equal_to(update):
                         self.aadut1 += 1
@@ -90,14 +91,14 @@ class Window():
                         self.wadi += 1
                     change = True
                     break
-                else:
+                else:  # Normally, this will not happen.
                     update_list.remove(ud)
                     continue
 
             if change:
                 update_list.remove(ud)
 
-            if update not in update_list: # A new update may cause many hits
+            if update not in update_list:  # Normally, this will be True.
                 update_list.append(update)
 
             self.trie[upfx] = update_list
@@ -115,6 +116,7 @@ class Window():
                 if ud.get_time() < self.start:
                     update_list.remove(ud)
                     continue
+
                 if upfx in ud.get_withdrawn():
                     self.wwdu += 1
                     change = True
@@ -137,19 +139,9 @@ class Window():
 
         return 0
 
-    def cut_trie(self):
-        """Delete updates that are out of current window.
-        Through del the updates' pointer in a time-updates dict.            
-        """
+    def cut_trie(self):  # Delete updates that are out of current window.
         print 'trie size before cut = ', len(self.trie)
-        '''
-        for t in self.time_update.keys():
-            if t < self.start:
-                for u in self.time_update[t]:
-                    del u
-                del self.time_update[t]
-        '''
-        for addr in sorted(self.trie.iter('')):
+        for addr in sorted(self.trie):
             ulist = self.trie[addr]
             try:
                 for update in ulist:
@@ -157,7 +149,7 @@ class Window():
                         ulist.remove(update)
                 if ulist == []:
                     del self.trie[addr]
-            except:
+            except:  # root node has value None
                 pass
         print 'trie size after cut = ', len(self.trie)
         return 0
