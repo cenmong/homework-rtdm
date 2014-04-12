@@ -149,13 +149,14 @@ class Window():
                     del u
                 del self.time_update[t]
         '''
-        for ulist in sorted(self.trie):
+        for addr in sorted(self.trie.iter('')):
+            ulist = self.trie[addr]
             try:
                 for update in ulist:
                     if update.get_time() < self.start:
                         ulist.remove(update)
                 if ulist == []:
-                    del ulist
+                    del self.trie[addr]
             except:
                 pass
         print 'trie size after cut = ', len(self.trie)
