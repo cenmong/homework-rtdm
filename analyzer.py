@@ -30,6 +30,8 @@ class Analyzer():
         for f in filelist.readlines():
             f = f.replace('\n', '')
             print f
+            self.win4.cut_trie()
+            self.win6.cut_trie()
             f = open(hdname + f, 'r')
             update_chunk = ''
             for line in f.readlines():
@@ -40,9 +42,6 @@ class Analyzer():
                         continue
                     else:
                         updt = Update(update_chunk)
-                        #if updt.get_protocol() == 6:
-                            #print update_chunk
-                            #updt.print_attr()
                         from_ip = updt.get_from_ip()
                         if from_ip in self.addr4_list:
                             self.win4.add(updt)
